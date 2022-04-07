@@ -8,6 +8,45 @@ const { printQR, base64QR } = require('../middleware/qrcode')
 
 router.use(bodyParser.json())
 
+//api for adding exsisting product from product_id from: localhost:5000/inventory/addexsisting/:id
+router.post('/addexsisting/:id', async(req, res) => {
+    console.log("Incoming request for add product to exsisting products");
+    
+    //getting product_id from req.params.id
+    const product_id = req.params.id;
+
+    //query for getting quantity from db
+    const qtyquery = `SELECT quantity FROM hotnot.product WHERE (product_id = ${product_id})`
+    
+    //fetching data from query
+    connection.query(qtyquery, function(err, qty) {
+        if(err) {
+            //error in getting quantity of products from product_id
+            console.log(err);
+            return res.status(400).json({ error: err })
+        }
+        
+        //getting new quantity
+        let nqty = qty[0].quantity + req.body.quantity;
+        
+        //query for updating quantity from db
+        let updatequery = `UPDATE hotnot.product SET quantity = ${nqty} WHERE (product_id = ${product_id}) `
+        
+        //query for updating the db
+        connection.query(updatequery, function(err, data) {
+            if(err) {
+                //error
+                console.log(err);
+                return res.status(400).json({ error: err })
+            }
+            //returning success response
+            console.log(data);
+            return res.status(200).json({ data: data })
+        })
+    })
+
+})
+
 router.post('/add', async(req, res) => {
     console.log("Icoming request for add products");
 
