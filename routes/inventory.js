@@ -86,4 +86,22 @@ router.post('/add', async(req, res) => {
 
 })
 
+//api for getting exsisting products from: localhost:5000/inventory/allProducts
+router.get('/allProducts', async(req, res) => {
+    console.log("Incomig request for getting all Products");
+
+    //query for getting all the product
+    const query = `SELECT * FROM hotnot.product`
+
+    //getting all the product from db
+    connection.query(query, function (err, data) {
+        if (err) {
+            //returning error
+            return res.status(400).json({ error: err })
+        }
+        //returning success
+        return res.status(200).json({ data: data })
+    })
+})
+
 module.exports = router
