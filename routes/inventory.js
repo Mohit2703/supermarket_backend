@@ -5,6 +5,9 @@ const Jimp = require('jimp')
 const multer = require('multer');
 const upload = multer({ dest: "files" });
 var QrCode = require('qrcode-reader');
+const fs = require('fs')
+const { promisify } = require('util')
+const unlinkAsync = promisify(fs.unlink)
 
 const connection = require('../connection')
 
@@ -151,10 +154,12 @@ router.get('/fetchProduct', upload.single('qrcode'), async (req, res) => {
 
             let query = `SELECT * FROM hotnot.product WHERE (product_id = ${value.result})`;
 
-            connection.query(query, function (err, data) {
+            connection.query(query, async (err, data) => {
                 if (err) {
                     res.status(400).json({ error: err })
                 }
+
+                await unlinkAsync(buffer.path)
 
                 return res.status(200).json({ data: data })
             })
