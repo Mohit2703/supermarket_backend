@@ -50,6 +50,7 @@ Start the server
 | `sell_price` | `int` | **Required** selling price of product |
 | `cost_price` | `int` | **Required** cost price of product |
 | `quantity` | `int` | **Required** quantity of product want to add |
+| `type` | `string` | **Required** type of product want to add |
 
 #### Get All Products
 
@@ -83,6 +84,19 @@ Start the server
 | :-------- | :------- | :------------------------- |
 | `qrcode` | `image(.png)` | **Required** |
 
+#### Update product info
+
+```http
+  PUT /inventory/updateProduct/:product_id
+```
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `title` | `string` | **Required**. product title |
+| `description` | `string` | **Required** product description |
+| `sell_price` | `int` | **Required** selling price of product |
+| `cost_price` | `int` | **Required** cost price of product |
+| `quantity` | `int` | **Required** quantity of product want to add |
+| `type` | `string` | **Required** type of product want to add |
 
 #### Make Cart
 

@@ -191,4 +191,30 @@ router.get('/fetchProduct', upload.single('qrcode'), async (req, res) => {
 
 })
 
+router.put('/updateProduct/:id', async(req, res) => {
+    //getting product id
+    const product_id = req.params.id;
+
+    const title = req.body.title;
+    const description = req.body.description
+    const quantity = req.body.quantity
+    const sell_price = req.body.sell_price
+    const cost_price = req.body.cost_price
+    const type = req.body.type
+
+    //update query
+    const updateQry = `UPDATE hotnot.product SET title = '${title}', description = '${description}', quantity = '${quantity}', sell_price = '${sell_price}', cost_price = '${cost_price}', type = '${type}' WHERE (product_id = ${product_id})`
+
+    //running update query
+    connection.query(updateQry, function(err, data) {
+        if(err) {
+            return res.status(400).json({ error: err })
+        }
+        else {
+            return res.status(200).json({ success: data })
+        }
+    })
+
+})
+
 module.exports = router
