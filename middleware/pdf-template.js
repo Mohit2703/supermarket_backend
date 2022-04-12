@@ -1,4 +1,4 @@
-module.exports = ({ a, name, phone, address, receiptId, in_date, total_amount, promo }) => {
+module.exports = ({ a, name, phone, receiptId, in_date, total_amount, promo }) => {
     let html1 = `<!DOCTYPE html>
     <html lang="en">
     <head>
@@ -79,7 +79,6 @@ module.exports = ({ a, name, phone, address, receiptId, in_date, total_amount, p
                     <div class="bill_detail">
                         <h4>Billed To:</h4>
                         <h5>${name}</h5>
-                        <p>${address}</p>
                         <p>Phone: ${phone}</p>
                     </div>
                 </div>
@@ -115,10 +114,6 @@ module.exports = ({ a, name, phone, address, receiptId, in_date, total_amount, p
     <td class="last_col">${total_amount}</td>
     </tr>
     </table>
-    </div>
-    <div class="promo_Code">
-    <span>Promo Code: </span>
-    <img src="../qrcodes/16.png" alt="">
     </div>
     </div>
     </body>

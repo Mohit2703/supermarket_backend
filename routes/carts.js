@@ -11,18 +11,16 @@ router.use(bodyParser.json())
 
 //api for making cart/ adding product to cart
 router.post("/makeCart", async (req, res) => {
-    // console.log("Incoming request for making cart");
-
     //getting products from body
     const products = req.body.products;
-    
+
     //getting user_id from body
     const userID = req.body.user_id;
-    
+
     //checking for required data
-    if(!(userID && products && products.length !== 0)) {
+    if (!(userID && products && products.length !== 0)) {
         console.log(" plzz fill the required details ");
-        return res.status(400).json({ error:  " plzz fill the required details "})
+        return res.status(400).json({ error: " plzz fill the required details " })
     }
 
     let pros = [];
@@ -54,9 +52,9 @@ router.post("/makeCart", async (req, res) => {
 router.get("/viewCart/:id", async (req, res) => {
     console.log("Incoming request for viewing cart");
 
-    const userID = req.params.id;
+    const cartID = req.params.id;
 
-    const cartQuery = `SELECT * FROM hotnot.new_cart WHERE (user_id = ${userID})`
+    const cartQuery = `SELECT * FROM hotnot.new_cart WHERE (cart_id = ${cartID})`
 
     connection.query(cartQuery, function (err, data) {
         if (err) {
@@ -85,19 +83,19 @@ router.get("/viewCart/:id", async (req, res) => {
 })
 
 //api for getting sales of a particular date
-router.get("/getSales", async(req, res) => {
+router.get("/getSales", async (req, res) => {
     console.log("get total profit of the day");
     const date = req.body.date;
 
-    if(!date) {
+    if (!date) {
         return res.status(400).json({ error: "Plzz enter date" })
     }
 
     const saleQry = `SELECT * FROM hotnot.checkout WHERE (in_date = '${date}')`
 
-    connection.query(saleQry, function(err, data) {
+    connection.query(saleQry, function (err, data) {
 
-        if(err) {
+        if (err) {
             return res.status(400).json({ error: err })
         }
         const sales = data;
@@ -130,6 +128,8 @@ router.post("/checkout/:id", async (req, res) => {
 
     //getting cartID from parameters
     const cartID = req.params.id;
+    const userName = req.body.name
+    const phone = req.body.phone
 
     //query for getting cart
     const qry = `SELECT * FROM hotnot.new_cart WHERE (cart_id = ${cartID})`
@@ -137,7 +137,6 @@ router.post("/checkout/:id", async (req, res) => {
     //runing qry
     connection.query(qry, function (err, data) {
 
-        // console.log("data from the cart done");
         if (err) {
             //retuning error in getting cart info
             return res.status(400).json({ error: err })
@@ -172,7 +171,6 @@ router.post("/checkout/:id", async (req, res) => {
                 //running query for getting product data
                 connection.query(proQuery, function (err, proData) {
 
-                    // console.log("Product data done");
                     if (err) {
                         //returning error if any in getting product data
                         return res.status(400).json({ error: err })
@@ -194,13 +192,11 @@ router.post("/checkout/:id", async (req, res) => {
                     let updateQry = `UPDATE hotnot.product set quantity = ${pro_qty} WHERE (product_id = ${xpro})`
 
                     //running updation query
-                    connection.query(updateQry, function(err, success) {
-                        if(err) {
-                            // console.log(err);
+                    connection.query(updateQry, function (err, success) {
+                        if (err) {
                             //returning error if any
                             return res.status(400).json({ error: err })
                         }
-                        // console.log(success);
                     })
 
                     pData = proData;
@@ -212,7 +208,7 @@ router.post("/checkout/:id", async (req, res) => {
                         sell_price: proData[0].sell_price,
                         total_sell: (xqty * proData[0].sell_price)
                     }
-                    // console.log(pData);
+
                     //pushing json pData in array cartData
                     cartData.push(pData);
                     //converting JSON pData into string and pushing it in array cartDa
@@ -220,59 +216,36 @@ router.post("/checkout/:id", async (req, res) => {
                     cartDa.push(xJSON);
                 })
             } catch (error) {
-                // console.log(error);
+
                 return res.status(400).json({ error: error })
             }
 
         }
 
-        let phone;
-        let name;
-        let address;
-
 
         try {
-            //query for getting user information
-            const userQry = `SELECT * FROM hotnot.user WHERE (user_id = ${userID})`
+            //setting Timeout as some time is required for getting data to be inserted
+            setTimeout(() => {
+                total_profit = total_sell - total_cost;
+                let address;
 
-            //running query for getting user info
-            connection.query(userQry, function (err, userD) {
+                //converting array cartDa into string
+                let cartDat = cartDa.join("@");
 
-                // console.log("data from user done");
-                if (err) {
-                    return res.status(400).json({ error: err })
-                }
+                //query for inserting data into checkout table
+                const sellQry = `INSERT INTO hotnot.checkout (cart_data, total_qty, total_cost, total_sell, total_profit, name, phone, address, in_date) values ('${cartDat}', ${total_qty}, ${total_cost}, ${total_sell}, ${total_profit}, '${userName}', '${phone}', '${address}', '${currDate}')`
 
-                phone = userD[0].phone;
-                name = userD[0].name
-                address = userD[0].address
+                //running query to insert data in checkout table
+                connection.query(sellQry, function (err, dat) {
+                    if (err) {
+                        res.status(400).json({ error: err })
+                    }
+                    else {
+                        return res.status(200).json({ reply: dat })
+                    }
 
-                //setting Timeout as some time is required for getting data to be inserted
-                setTimeout(() => {
-                    total_profit = total_sell - total_cost;
-                    // console.log(cartData);
-
-                    //converting array cartDa into string
-                    let cartDat = cartDa.join("@");
-
-                    //query for inserting data into checkout table
-                    const sellQry = `INSERT INTO hotnot.checkout (cart_data, total_qty, total_cost, total_sell, total_profit, name, phone, address, in_date) values ('${cartDat}', ${total_qty}, ${total_cost}, ${total_sell}, ${total_profit}, '${name}', '${phone}', '${address}', '${currDate}')`
-
-                    //running query to insert data in checkout table
-                    connection.query(sellQry, function (err, dat) {
-                        // console.log("data added to checkout");
-                        if (err) {
-                            // console.log(err);
-                            res.status(400).json({ error: err })
-                        }
-                        else {
-                            // console.log(dat);
-                            return res.status(200).json({ reply: dat })
-                        }
-
-                    })
-                }, 5000)
-            })
+                })
+            }, 4000)
 
         } catch (error) {
             return res.status(400).json({ error: error })
@@ -281,18 +254,21 @@ router.post("/checkout/:id", async (req, res) => {
     })
 })
 
-
-router.get("/createInvoice/:id", async(req, res) => {
+//api for generating invoice from checkout_id running at: localhoost:5000/cart/createInvoice/:checkout_id
+router.get("/createInvoice/:id", async (req, res) => {
     console.log("Generate Invoice");
 
+    //getting checkout Id from params
     const checkoutID = req.params.id;
 
+    //query for finding info 
     const checkQuery = `SELECT * FROM hotnot.checkout WHERE (checkout_id = ${checkoutID})`
 
-    connection.query(checkQuery, function(err, invoiceDet) {
+    //running query
+    connection.query(checkQuery, function (err, invoiceDet) {
 
-        if(err) {
-            console.log(err);
+        if (err) {
+            //returning error if any
             return res.status(400).json({ error: err })
         }
 
@@ -314,13 +290,16 @@ router.get("/createInvoice/:id", async(req, res) => {
                 a.push(data)
             }
 
-            pdf.create(pdfTemplate({a, name, phone, address, receiptId, in_date, total_amount, promo}),{})
-            .toFile('./routes/invoice.pdf', (err) => {
-                if(err) {
-                    return res.status(400).json({ error: err })
-                }
-                res.status(200).sendFile(`${__dirname}/invoice.pdf`)
-            })
+            //passing params for creating pdf and instance of pdf at routes/invoice.pdf
+            pdf.create(pdfTemplate({ a, name, phone, receiptId, in_date, total_amount, promo }), {})
+                .toFile('./routes/invoice.pdf', (err) => {
+                    if (err) {
+                        //returning error if any
+                        return res.status(400).json({ error: err })
+                    }
+                    //return success status
+                    res.status(200).sendFile(`${__dirname}/invoice.pdf`)
+                })
 
         }
     })
