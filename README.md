@@ -1,11 +1,10 @@
 # Backend for supremarket
 
+## Tech Stack
 
-## Documentation
+**Server:** Node, Express
 
-[Documentation](https://linktodocumentation)
-
-
+**Database:** mySql
 ## Run Locally
 
 Clone the project
