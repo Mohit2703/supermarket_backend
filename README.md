@@ -1,7 +1,36 @@
-# hotnot_sub
-
-
 # Backend for supremarket
+
+
+## Documentation
+
+[Documentation](https://linktodocumentation)
+
+
+## Run Locally
+
+Clone the project
+
+```bash
+  git clone https://github.com/Mohit2703/supermarket_backend.git
+```
+
+Go to the project directory
+
+```bash
+  cd supermarket_backend
+```
+
+Install dependencies
+
+```bash
+  npm install
+```
+
+Start the server
+
+```bash
+  npm run start
+```
 
 
 
